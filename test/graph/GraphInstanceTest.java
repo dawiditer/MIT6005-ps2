@@ -39,11 +39,12 @@ public abstract class GraphInstanceTest {
     //
     //   Partition for graph.remove(label)
     //      graph: empty, contains multiple vertices
-    //      label: exists in graph, doesn't exist in graph
+    //      label: exists in graph, doesn't exist in graph,
+    //             exists in edges, doesnt exist in an edge
     //      output: if remove() returns true, graph is modified
     //              ie number of vertices decreases by 1
     //              else graph unmodified
-    //      observe with vertices()
+    //      observe with vertices(), sources(), targets()
     //   
     //   Partition for graph.set(source,target,weight) -> previousWeight
     //      graph: empty, contains multiple vertices    
@@ -52,22 +53,6 @@ public abstract class GraphInstanceTest {
     //      No edge exists from source to target,
     //      An edge exists from source to target,
     //      weight: 0, > 0
-    //
-    //      set() involves 3 operations; add, remove or update an edge:
-    //      if weight > 0
-    //        if either source or target or both don't exist
-    //          add: number of vertices increase by 1 (or 2 for both) if they are not in vertices() 
-    //              this source is added to this target's sources or
-    //              this target is added to this source's targets
-    //              previousWeight = 0
-    //        if both source and target exist
-    //          update: previousWeight = this weight
-    //              this weight = input weight
-    //
-    //      if weight = 0 and both source and target exist
-    //        remove: this source is removed from this target's sources
-    //              this target is removed from this sources's targets
-    //      else graph is unmodified
     //      observe with sources(), targets(), vertices()
     //    
     //   Partition for graph.vertices() -> allVertices
@@ -140,6 +125,7 @@ public abstract class GraphInstanceTest {
         assertEquals("Expected same number of vertices",InitialNumOfVertices,CurrentNumOfVertices);
     }
     
+    //Tests for graph.remove(vertex)
     @Test
     //covers empty graph
     //       label doesn't exist in graph
@@ -159,6 +145,7 @@ public abstract class GraphInstanceTest {
     @Test
     //covers graph contains multiple vertices
     //       label doesn't exist in graph
+    //       label doesn't exist in an edge
     public void testRemoveNotExistInGraph(){
         Graph<String> graph = emptyInstance();
         Set<String> vertices = graph.vertices();
@@ -183,6 +170,7 @@ public abstract class GraphInstanceTest {
     @Test
     //covers graph contains multiple vertices
     //       label exists in graph
+    //       label doesn't exist in an edge
     public void testRemoveExistsInGraph(){
         Graph<String> graph = emptyInstance();
         Set<String> vertices = graph.vertices();
@@ -201,8 +189,47 @@ public abstract class GraphInstanceTest {
         
         assertTrue("Expected vertex removed", vertex1Removed);
         assertEquals("Expected number of vertices reduced by 1", InitialNumOfVertices - 1, CurrentNumOfVertices);
+        //assumes case not changed
+        assertFalse("Expected correct vertex removed", vertices.contains(vertex1));
     }
-    
+    @Test
+    //covers graph contains multiple vertices
+    //       label exists in graph
+    //       label exists in edges
+    public void testExistInGraphAndEdge(){
+        Graph<String> graph = emptyInstance();
+        final String source1 = "Vertex1";
+        final String source2 = "Vertex2";
+        final String source3 = "Vertex3";
+        final String target1 = "Vertex4";
+        final int weight = 1;
+        
+        //create 3 edges
+        graph.set(source1, target1, weight);
+        graph.set(source2, target1, weight);
+        graph.set(source3, source1, weight);
+        
+        Set<String> vertices = graph.vertices(); 
+        int initialNumVertices = vertices.size();
+        final boolean vertexRemoved = graph.remove(source1); 
+        int currentNumVertices = vertices.size();
+        
+        int expectedNumSources = 1;
+        int expectedNumTargets = 1;
+        int currentNumSources = graph.sources(target1).size() +
+                                graph.sources(source1).size();
+        int currentNumTargets = graph.targets(source1).size() +
+                                graph.targets(source2).size() +
+                                graph.targets(source3).size();
+        
+        assertTrue("Expected vertex removed from graph", vertexRemoved);
+        assertEquals("Expected number of vertices to reduce by 1", initialNumVertices - 1, currentNumVertices);
+        assertEquals("Expected vertex removed from sources", expectedNumSources, currentNumSources);
+        assertEquals("Expected vertex removed from targets", expectedNumTargets, currentNumTargets);
+        //assumes case ot changed
+        assertFalse("Expected correct vertex removed", vertices.contains(source1));
+    }
+    //Tests for graph.set()
     @Test
     //covers empty graph
     //       target doesn't exist in graph,
@@ -430,7 +457,7 @@ public abstract class GraphInstanceTest {
         
         Set<String> vertices = graph.vertices();
         
-        assertEquals("Expected non-empty set", Collections.emptySet(), vertices);
+        assertNotEquals("Expected non-empty set", Collections.emptySet(), vertices);
         assertEquals("Expected 3 vertices", 3, vertices.size());
     }
     
@@ -513,8 +540,10 @@ public abstract class GraphInstanceTest {
     //       source not in graph
     public void testTargetsNoTarget(){
         Graph<String> graph = emptyInstance();
+        
         graph.add("Vertex1");
         graph.add("Vertex2");
+        
         final String source = "Vertex3";
         
         Map<String, Integer> targets = graph.targets(source);
@@ -529,6 +558,7 @@ public abstract class GraphInstanceTest {
     public void testTargetsNoTargetsFromSource(){
         Graph<String> graph = emptyInstance();
         final String source = "Vertex1";
+        
         graph.add(source);
         graph.add("Vertex2");
         
