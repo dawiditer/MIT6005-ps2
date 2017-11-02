@@ -147,11 +147,12 @@ public class ConcreteEdgesGraph implements Graph<String> {
         checkRep();
         return initialSizeVertices - 1 == vertices.size();
     }
-    
+    /** Returns an read-only view of this ConcreteEdgesGraph's vertices */
     @Override public Set<String> vertices() {
         return Collections.unmodifiableSet(vertices);
     }
-    
+
+    /** Returns an read-only view of a target's sources */
     @Override public Map<String, Integer> sources(String target) {
         Map<String, Integer> sources = edges.stream()
                 .filter(edge -> edge.getTarget().equalsIgnoreCase(target))
@@ -160,7 +161,7 @@ public class ConcreteEdgesGraph implements Graph<String> {
         checkRep();
         return Collections.unmodifiableMap(sources);
     }
-    
+    /** Returns an read-only view of a source's targets */
     @Override public Map<String, Integer> targets(String source) {
         Map<String, Integer> targets = edges.stream()
                 .filter(edge -> edge.getSource().equalsIgnoreCase(source))
