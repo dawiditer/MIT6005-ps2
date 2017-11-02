@@ -134,6 +134,15 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //      has only one input, edge
     //      the output string should contain
     //      the source, the target and the weight of this edge
+    //
+    //  Partition for thisEdge.equals(thatEdge)
+    //      thisEdge equal to thatEdge (observational equality)
+    //      thisEdge not equal to thatEdge
+    //      thisEdge.source == thatEdge.source
+    //      thisEdge.target == thatEdge.source
+    //      thisEdge.source different case to thatEdge.source
+    //      thisEdge.target different case to thatEdge.target
+    //   include tests for reflexive, symmetric and transitive properties
     // TODO tests for operations of Edge
     @Test
     public void testGetSource(){
@@ -215,5 +224,82 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(edgeRep);
         return matcher.find();
-    }   
+    }
+    
+    //Tests for edge.equals()
+    @Test
+    //covers thisEdge equal to thatEdge
+    //       thisEdge source and target == thatEdge source and target
+    public void testEqualsSameCaseEqualEdges(){
+        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge3 = new Edge("Vertex1", "Vertex2", 1);
+        
+        //reflexive,
+        assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
+        assertTrue("Expected egde2 equal to itself", edge2.equals(edge2));
+        assertTrue("Expected egde3 equal to itself", edge3.equals(edge3));
+        //symmetric
+        assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
+        assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
+        //transitive
+        assertEquals("Expected edge1 transitively equal to edge2",
+                edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
+    }
+    
+    @Test
+    //covers thisEdge equal to thatEdge
+    //       thisEdge.source different case to thatEdge.source
+    //       thisEdge.target == thatEdge.target
+    public void testEqualsDiffSourceCaseEqualEdges(){
+        Edge edge1 = new Edge("vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge3 = new Edge("vErtex1", "Vertex2", 1);
+        
+        
+        
+        assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
+        assertTrue("Expected egde2 equal to itself", edge2.equals(edge2));
+        assertTrue("Expected egde3 equal to itself", edge3.equals(edge3));
+        
+        assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
+        assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
+       
+        assertEquals("Expected edge1 transitively equal to edge2",
+                edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
+    }
+    
+    @Test
+    //covers thisEdge equal to thatEdge
+    //       thisEdge.target different case to thatEdge.target
+    //       thisEdge.source == thatEdge.source
+    public void testEqualsDiffTargetCaseEqualEdges(){
+        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "vertex2", 1);
+        Edge edge3 = new Edge("Vertex1", "VeRtex2", 1);
+        
+        
+        
+        assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
+        assertTrue("Expected egde2 equal to itself", edge2.equals(edge2));
+        assertTrue("Expected egde3 equal to itself", edge3.equals(edge3));
+        
+        assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
+        assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
+       
+        assertEquals("Expected edge1 by transition equal to edge2",
+                edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
+    }
+    
+    @Test
+    //covers thisEdge not equal to thatEdge
+    public void testEqualsEdgesNotEqual(){
+        Edge edge1 = new Edge("vertex", "vertex1", 1);
+        Edge edge2 = new Edge("vertex1", "vertex", 1);
+        Edge edge3 = new Edge("vertex", "vertex1", 2);
+        
+        assertFalse("Expected edges not equal", edge1.equals(edge2));
+        assertFalse("Expected edges not equal", edge2.equals(edge1));
+        assertFalse("Expected edges not equal", edge3.equals(edge1));
+    }
 }
