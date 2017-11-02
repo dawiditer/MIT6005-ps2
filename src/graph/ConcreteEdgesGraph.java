@@ -299,8 +299,8 @@ class Edge {
     @Override public int hashCode(){
         final int prime = 31;
         int result = 1;
-        result = prime * result + getSource().hashCode();
-        result = prime * result + getTarget().hashCode();
+        result = prime * result + getSource().toLowerCase().hashCode();//for case-insensitivity
+        result = prime * result + getTarget().toLowerCase().hashCode();
         result = prime * result + (int) getWeight();
         return result;
     }
