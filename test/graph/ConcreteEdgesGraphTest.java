@@ -143,6 +143,16 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //      thisEdge.source different case to thatEdge.source
     //      thisEdge.target different case to thatEdge.target
     //   include tests for reflexive, symmetric and transitive properties
+    //  
+    //  Partition for edge.hashCode()
+    //      use two edges for comparison; thisEdge, thatEdge
+    //      thisEdge equals() thatEdge
+    //      thisEdge not equals() thatEdge
+    //      thisEdge.source == thatEdge.source
+    //      thisEdge.target == thatEdge.source
+    //      thisEdge.source different case to thatEdge.source
+    //      thisEdge.target different case to thatEdge.target
+    //
     // TODO tests for operations of Edge
     @Test
     public void testGetSource(){
@@ -301,5 +311,65 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
         assertFalse("Expected edges not equal", edge1.equals(edge2));
         assertFalse("Expected edges not equal", edge2.equals(edge1));
         assertFalse("Expected edges not equal", edge3.equals(edge1));
+    }
+    //Tests for edge.hashCode()
+    @Test
+    //covers thisEdge equals() thatEdge
+    //       thisEdge source and target == thatEdge source and target
+    public void testHashCodeEqualEdges(){
+        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        
+        int hashCodeEdge1 = edge1.hashCode();
+        int hashCodeEdge2 = edge2.hashCode();
+        
+        assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
+    }
+    
+    @Test
+    //covers thisEdge equals() thatEdge
+    //       thisEdge.source different case to thatEdge.source
+    //       thisEdge.target == thatEdge.target
+    public void testHashCodeDiffSourceCaseEqualEdges(){
+        Edge edge1 = new Edge("vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        
+        int hashCodeEdge1 = edge1.hashCode();
+        int hashCodeEdge2 = edge2.hashCode();
+        
+        assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
+    }
+    
+    @Test
+    //covers thisEdge equals() thatEdge
+    //       thisEdge.target different case to thatEdge.target
+    //       thisEdge.source == thatEdge.source
+    public void testHashCodeDiffTargetCaseEqualEdges(){
+        Edge edge1 = new Edge("Vertex1", "vertex2", 1);
+        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        
+        int hashCodeEdge1 = edge1.hashCode();
+        int hashCodeEdge2 = edge2.hashCode();
+        
+        assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
+    }
+    
+    @Test
+    //covers thisEdge not equals() thatEdge
+    public void testHashCodeEdgesNotEqual(){
+        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
+        Edge edge2 = new Edge("Vertex2", "Vertex1", 1);
+        Edge edge3 = new Edge("vertex1", "vertex2", 2);
+        
+        int hashCodeEdge1 = edge1.hashCode();
+        int hashCodeEdge2 = edge2.hashCode();
+        int hashCodeEdge3 = edge3.hashCode();
+        
+        assertNotEquals("Expected different hashcodes for unequal edges", 
+                hashCodeEdge1, hashCodeEdge2);
+        assertNotEquals("Expected different hashcodes for unequal edges", 
+                hashCodeEdge1, hashCodeEdge3);
+        assertNotEquals("Expected different hashcodes for unequal edges", 
+                hashCodeEdge2, hashCodeEdge3);
     }
 }
