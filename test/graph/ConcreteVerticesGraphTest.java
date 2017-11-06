@@ -48,6 +48,13 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
     //   include tests for adding a source that exists but with
     //   a different weight
     //
+    // Partition for vertex.remove(otherVertex) -> previousWeight
+    //   vertex: empty, contains multiple sources and targets
+    //   otherVertex: doesn't exist, 
+    //                exists as a source,
+    //                exists as a target
+    //   include tests for otherVertex exists as a source and a target
+    //
     // Partition for vertex.addsource(target, weight) -> boolean
     //   vertex: empty, contains multiple targets
     //   target: exists as a target, doesn't exist
@@ -258,6 +265,137 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
         assertFalse("Expected target1 not added again", target1AddedAgain);
         assertEquals("Expected same number of target vertices",
                 initialNumTargets, CurrentNumTargets);
+    }
+    //Tests for remove()
+    @Test
+    //covers empty vertex
+    //       otherVertex doesn't exist
+    public void testRemoveEmptyVertex(){
+        final Vertex vertex = new Vertex("vertex");
+        final String otherVertex = "othervertex";
+        Map<String, Integer> sources = vertex.getSources();
+        Map<String, Integer> targets = vertex.getTargets();
+        
+        final int initialNumSources = sources.size();
+        final int initialNumTargets = targets.size();
+        final int previousWeight = vertex.remove(otherVertex); 
+        final int currentNumSources = sources.size();
+        final int currentNumTargets = targets.size();
+        
+        assertEquals("Expected empty vertex to have no source vertices", 
+                0, initialNumSources);
+        assertEquals("Expected empty vertex to have no target vertices", 
+                0, initialNumTargets);
+        assertEquals("Expected no previous weight", 
+                0, previousWeight);
+        assertEquals("Expected no change in sources", 
+                Collections.emptyMap(), sources);
+        assertEquals("Expected no change in targets", 
+                Collections.emptyMap(), targets);
+        assertEquals("Expected no new source vertices", 
+                initialNumSources, currentNumSources);
+        assertEquals("Expected no new target vertices", 
+                initialNumTargets, currentNumTargets);
+    }
+    @Test
+    //covers vertex contains multiple sources
+    //       otherVertex exists as a source
+    public void testRemoveExistsAsSource(){
+        final Vertex vertex = new Vertex("vertex");
+        final String otherVertex = "source1";
+        final String source2 = "source2";
+        final int weight = 1;
+        Map<String, Integer> sources = vertex.getSources();
+        Map<String, Integer> targets = vertex.getTargets();
+        
+        final boolean otherVertexAdded = vertex.addSource(otherVertex, weight);
+        final boolean source2Added = vertex.addSource(source2, weight);
+        
+        final int initialNumSources = sources.size();
+        final int previousWeight = vertex.remove(otherVertex); 
+        final int currentNumSources = sources.size();
+        
+        assertTrue("Expected otherVertex added", otherVertexAdded);
+        assertTrue("Expected source2 added", source2Added);
+        assertEquals("Expected vertex to have 2 source vertices", 
+                2, initialNumSources);
+        assertEquals("Expected correct previous weight", 
+                weight, previousWeight);
+        assertEquals("Expected num of sources to decrease by 1", 
+                initialNumSources - 1, currentNumSources);
+        assertFalse("Expected otherVertex removed", sources.containsKey(otherVertex));
+        assertEquals("Expected no change in targets", 
+                Collections.emptyMap(), targets);
+    }
+    @Test
+    //covers vertex contains multiple targets
+    //       otherVertex exists as a target
+    public void testRemoveExistsAsTarget(){
+        final Vertex vertex = new Vertex("vertex");
+        final String otherVertex = "othervertex";
+        final String target2 = "target2";
+        final int weight = 1;
+        Map<String, Integer> targets = vertex.getTargets();
+        Map<String, Integer> sources = vertex.getSources();
+        
+        final boolean otherVertexAdded = vertex.addTarget(otherVertex, weight);
+        final boolean target2Added = vertex.addTarget(target2, weight);
+        
+        final int initialNumTargets = targets.size();
+        final int previousWeight = vertex.remove(otherVertex); 
+        final int currentNumTargets = targets.size();
+        
+        assertTrue("Expected otherVertex added", otherVertexAdded);
+        assertTrue("Expected target2 added", target2Added);
+        assertEquals("Expected vertex to have 2 target vertices", 
+                2, initialNumTargets);
+        assertEquals("Expected correct previous weight", 
+                weight, previousWeight);
+        assertEquals("Expected num of targets to decrease by 1", 
+                initialNumTargets - 1, currentNumTargets);
+        assertFalse("Expected otherVertex removed", targets.containsKey(otherVertex));
+        assertEquals("Expected no change in sources", 
+                Collections.emptyMap(), sources);
+    }
+    @Test
+    //covers vertex contains multiple sources and targets
+    //       otherVertex exists as a source and a target
+    public void testRemoveExistsAsBoth(){
+        final Vertex vertex = new Vertex("vertex");
+        final String otherVertex = "othervertex";
+        final String target = "target";
+        final String source = "source";
+        final int weight = 1;
+        Map<String, Integer> targets = vertex.getTargets();
+        Map<String, Integer> sources = vertex.getSources();
+        
+        final boolean otherVertexTarget = vertex.addTarget(otherVertex, weight);
+        final boolean targetAdded = vertex.addTarget(target, weight);
+        final boolean otherVertexSource = vertex.addSource(otherVertex, weight);
+        final boolean sourceAdded = vertex.addSource(source, weight);
+
+        final int initialNumSources = sources.size();
+        final int initialNumTargets = targets.size();
+        final int previousWeight = vertex.remove(otherVertex);  
+        final int currentNumSources = sources.size();
+        final int currentNumTargets = targets.size();
+        
+        assertTrue("Expected otherVertex added as target", otherVertexTarget);
+        assertTrue("Expected target added", targetAdded);
+        assertTrue("Expected otherVertex added as source", otherVertexSource);
+        assertTrue("Expected source added", sourceAdded);
+        assertEquals("Expected vertex to have 2 source vertices", 
+                2, initialNumSources);
+        assertEquals("Expected vertex to have 2 target vertices", 
+                2, initialNumTargets);
+        assertEquals("Expected correct previous weight", 
+                weight, previousWeight);
+        assertEquals("Expected num of sources to decrease by 1", 
+                initialNumSources - 1, currentNumSources);
+        assertEquals("Expected num of targets to decrease by 1", 
+                initialNumTargets - 1, currentNumTargets);
+        assertFalse("Expected otherVertex removed as source", sources.containsKey(otherVertex));
+        assertFalse("Expected otherVertex removed as target", targets.containsKey(otherVertex));
     }
     
     //Tests for removeSource()
@@ -794,7 +932,7 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
     //       otherVertex not a target
     public void testIsTargetEmptyVertex(){
         final Vertex vertex = new Vertex("vertex");
-        final String otherVertex = "otherVertex";
+        final String otherVertex = "othervertex";
         
         final boolean isTarget = vertex.isTarget(otherVertex);
         assertFalse("Expected empty vertex to have no targets", isTarget);
@@ -807,7 +945,7 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
         final Vertex vertex = new Vertex("vertex");
         final String target1 = "target1";
         final String target2 = "target2";
-        final String otherVertex = "otherVertex";
+        final String otherVertex = "othervertex";
         final int weight = 1;
         
         final boolean target1Added = vertex.addTarget(target1, weight);
@@ -845,7 +983,7 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
     //       otherVertex not a source
     public void testIsSourceEmptyVertex(){
         final Vertex vertex = new Vertex("vertex");
-        final String otherVertex = "otherVertex";
+        final String otherVertex = "othervertex";
         
         final boolean isSource = vertex.isSource(otherVertex);
         assertFalse("Expected empty vertex to have no sources", isSource);
@@ -858,7 +996,7 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
         final Vertex vertex = new Vertex("vertex");
         final String source1 = "source1";
         final String source2 = "source2";
-        final String otherVertex = "otherVertex";
+        final String otherVertex = "othervertex";
         final int weight = 1;
         
         final boolean source1Added = vertex.addSource(source1, weight);
@@ -889,6 +1027,73 @@ public class ConcreteVerticesGraphTest extends GraphInstanceTest {
         assertTrue("Expected source2 added", source2Added);
         assertTrue("Expected source1 to be a source", isSource);
     }
-    // TODO: tests for vertex.toString()
+    
+    // Tests for vertex.toString()
+    @Test
+    //covers empty vertex
+    public void testToStringEmptyVertex(){
+        final Vertex vertex = new Vertex("vertex");
+        final String label = vertex.getLabel();
+        String stringRep = vertex.toString();
+        
+        String regex = String.format("label: %s, sources: %d, targets: %d",
+                label, 0, 0);
+        
+        assertTrue("Expected correct vertex string rep",stringRep.matches(regex));
+    }
+    @Test
+    //covers vertex contains sources but no targets
+    public void testToStringMultipleSourcesNoTargets(){
+        final Vertex vertex = new Vertex("vertex");
+        
+        vertex.addSource("source1", 1);
+        vertex.addSource("source2", 1);
+        
+        final String label = vertex.getLabel();
+        final int numSources = vertex.getSources().size();
+        String stringRep = vertex.toString();
+        
+        String regex = String.format("label: %s, sources: %d, targets: %d",
+                label, numSources, 0);
+        
+        assertTrue("Expected correct vertex string rep",stringRep.matches(regex));
+    }
+    @Test
+    //covers vertex contains targets but no sources
+    public void testToStringMultipleTargetsNoSources(){
+        final Vertex vertex = new Vertex("vertex");
+        
+        vertex.addTarget("target1", 1);
+        vertex.addTarget("target2", 1);
+        
+        final String label = vertex.getLabel();
+        final int numTargets = vertex.getTargets().size();
+        String stringRep = vertex.toString();
+        
+        String regex = String.format("label: %s, sources: %d, targets: %d",
+                label, 0, numTargets);
+        
+        assertTrue("Expected correct vertex string rep",stringRep.matches(regex));
+    }
+    @Test
+    //covers vertex contains sources and targets
+    public void testToStringMultipleTargetsSources(){
+        final Vertex vertex = new Vertex("vertex");
+        
+        vertex.addSource("source1", 1);
+        vertex.addSource("source2", 1);
+        vertex.addTarget("target1", 1);
+        vertex.addTarget("target2", 1);
+        
+        final String label = vertex.getLabel();
+        final int numSources = vertex.getSources().size();
+        final int numTargets = vertex.getTargets().size();
+        String stringRep = vertex.toString();
+        
+        String regex = String.format("label: %s, sources: %d, targets: %d",
+                label, numSources, numTargets);
+        
+        assertTrue("Expected correct vertex string rep",stringRep.matches(regex));
+    }
 }  
 
