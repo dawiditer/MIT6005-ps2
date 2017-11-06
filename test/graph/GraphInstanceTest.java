@@ -7,7 +7,6 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -89,12 +88,11 @@ public abstract class GraphInstanceTest {
     //       label doesn't exist in graph
     public void testAddEmptyGraph(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final int InitialNumOfVertices = vertices.size();
-        final String vertex = "Vertex";
+        final int InitialNumOfVertices = graph.vertices().size();
+        final String vertex = "vertex";
         final boolean vertexAdded = graph.add(vertex);
-        final int CurrentNumOfVertices = vertices.size();
+        final int CurrentNumOfVertices = graph.vertices().size();
         
         assertTrue("Expected vertex to be added", vertexAdded);
         assertEquals("Expected vertices to increase by one",InitialNumOfVertices + 1,CurrentNumOfVertices);
@@ -105,19 +103,18 @@ public abstract class GraphInstanceTest {
     //       label exists in graph
     public void testAddExistsInGraph(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final String vertex1 = "Vertex1";
-        final String vertex2 = "Vertex2";
+        final String vertex1 = "vertex1";
+        final String vertex2 = "vertex2";
         
         final boolean vertex1Added = graph.add(vertex1);
         final boolean vertex2Added = graph.add(vertex2);
         
-        final int InitialNumOfVertices = vertices.size();
+        final int InitialNumOfVertices = graph.vertices().size();
         
         final boolean vertex1AddedAgain = graph.add(vertex1);
         
-        final int CurrentNumOfVertices = vertices.size();
+        final int CurrentNumOfVertices = graph.vertices().size();
         
         assertTrue("Expected vertex1 to be added", vertex1Added);
         assertTrue("Expected vertex2 to be added", vertex2Added);
@@ -131,12 +128,11 @@ public abstract class GraphInstanceTest {
     //       label doesn't exist in graph
     public void testRemoveEmptyGraph(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final int InitialNumVertices = vertices.size();
-        final String vertex = "Vertex";
+        final int InitialNumVertices = graph.vertices().size();
+        final String vertex = "vertex";
         final boolean vertexRemoved = graph.remove(vertex);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         
         assertFalse("Expected no effect on graph after remove", vertexRemoved);
         assertEquals("Expected same number of vertices", InitialNumVertices, CurrentNumVertices);
@@ -148,20 +144,19 @@ public abstract class GraphInstanceTest {
     //       label doesn't exist in an edge
     public void testRemoveNotExistInGraph(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final String vertex1 = "Vertex1";
-        final String vertex2 = "Vertex2";
-        final String vertex3 = "Vertex3";
+        final String vertex1 = "vertex1";
+        final String vertex2 = "vertex2";
+        final String vertex3 = "vertex3";
         
         graph.add(vertex1);
         graph.add(vertex2);
         
-        final int InitialNumOfVertices = vertices.size();
+        final int InitialNumOfVertices = graph.vertices().size();
         
         final boolean vertex3Removed = graph.remove(vertex3);
         
-        final int CurrentNumOfVertices = vertices.size();
+        final int CurrentNumOfVertices = graph.vertices().size();
         
         assertFalse("Expected no effect on graph after remove", vertex3Removed);
         assertEquals("Expected same number of vertices", InitialNumOfVertices, CurrentNumOfVertices);
@@ -175,17 +170,17 @@ public abstract class GraphInstanceTest {
         Graph<String> graph = emptyInstance();
         Set<String> vertices = graph.vertices();
         
-        final String vertex1 = "Vertex1";
-        final String vertex2 = "Vertex2";
+        final String vertex1 = "vertex1";
+        final String vertex2 = "vertex2";
         
         graph.add(vertex1);
         graph.add(vertex2);
         
-        final int InitialNumOfVertices = vertices.size();
+        final int InitialNumOfVertices = graph.vertices().size();
         
         final boolean vertex1Removed = graph.remove(vertex1);
         
-        final int CurrentNumOfVertices = vertices.size();
+        final int CurrentNumOfVertices = graph.vertices().size();
         
         assertTrue("Expected vertex removed", vertex1Removed);
         assertEquals("Expected number of vertices reduced by 1", InitialNumOfVertices - 1, CurrentNumOfVertices);
@@ -196,12 +191,12 @@ public abstract class GraphInstanceTest {
     //covers graph contains multiple vertices
     //       label exists in graph
     //       label exists in edges
-    public void testExistInGraphAndEdge(){
+    public void testRemoveExistInGraphAndEdge(){
         Graph<String> graph = emptyInstance();
-        final String source1 = "Vertex1";
-        final String source2 = "Vertex2";
-        final String source3 = "Vertex3";
-        final String target1 = "Vertex4";
+        final String source1 = "vertex1";
+        final String source2 = "vertex2";
+        final String source3 = "vertex3";
+        final String target1 = "vertex4";
         final int weight = 1;
         
         //create 3 edges
@@ -209,10 +204,9 @@ public abstract class GraphInstanceTest {
         graph.set(source2, target1, weight);
         graph.set(source3, source1, weight);
         
-        Set<String> vertices = graph.vertices(); 
-        int initialNumVertices = vertices.size();
+        int initialNumVertices = graph.vertices().size();
         final boolean vertexRemoved = graph.remove(source1); 
-        int currentNumVertices = vertices.size();
+        int currentNumVertices = graph.vertices().size();
         
         int expectedNumSources = 1;
         int expectedNumTargets = 1;
@@ -227,7 +221,7 @@ public abstract class GraphInstanceTest {
         assertEquals("Expected vertex removed from sources", expectedNumSources, currentNumSources);
         assertEquals("Expected vertex removed from targets", expectedNumTargets, currentNumTargets);
         //assumes case ot changed
-        assertFalse("Expected correct vertex removed", vertices.contains(source1));
+        assertFalse("Expected correct vertex removed", graph.vertices().contains(source1));
     }
     //Tests for graph.set()
     @Test
@@ -239,16 +233,15 @@ public abstract class GraphInstanceTest {
     //expects set() to add a new edge to graph
     public void testSetEmptyGraph(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 1;
         
         final int previousWeight = graph.set(source, target, weight);
         
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -269,16 +262,15 @@ public abstract class GraphInstanceTest {
     //       weight > 0
     public void testSetSourceNotExist(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 1;
         
         graph.add(target);
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, weight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -299,16 +291,15 @@ public abstract class GraphInstanceTest {
     //       weight > 0
     public void testSetTargetNotExist(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 1;
         
         graph.add(source);
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, weight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -328,17 +319,16 @@ public abstract class GraphInstanceTest {
     //       weight > 0
     public void testSetNoEdgeExists(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 1;
         
         graph.add(source);
         graph.add(target);
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, weight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -357,20 +347,19 @@ public abstract class GraphInstanceTest {
     //       weight > 0
     public void testSetUpdateWeight(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
         //create an edge to test set() on
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int initialWeight = 1;
         graph.add(source);
         graph.add(target);
         graph.set(source, target, initialWeight);
         
         final int newWeight = 2;
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, newWeight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -388,20 +377,19 @@ public abstract class GraphInstanceTest {
     //       weight = 0
     public void testSetRemoveEdge(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
         
         //create an edge to test set() on
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int initialWeight = 1;
         graph.add(source);
         graph.add(target);
         graph.set(source, target, initialWeight);
         
         final int newWeight = 0;
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, newWeight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -419,17 +407,16 @@ public abstract class GraphInstanceTest {
     //       weight = 0
     public void testSetEdgeNotExistRemoveEdge(){
         Graph<String> graph = emptyInstance();
-        Set<String> vertices = graph.vertices();
 
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 0;
         
         graph.add(source);
         graph.add(target);
-        final int InitialNumVertices = vertices.size();
+        final int InitialNumVertices = graph.vertices().size();
         final int previousWeight = graph.set(source, target, weight);
-        final int CurrentNumVertices = vertices.size();
+        final int CurrentNumVertices = graph.vertices().size();
         Map<String, Integer> targets = graph.targets(source);
         Map<String, Integer> sources = graph.sources(target);
         
@@ -451,9 +438,9 @@ public abstract class GraphInstanceTest {
     public void testVertices() {
         Graph<String> graph = emptyInstance();
         
-        graph.add("Vertex1");
-        graph.add("Vertex2");
-        graph.add("Vertex3");
+        graph.add("vertex1");
+        graph.add("vertex2");
+        graph.add("vertex3");
         
         Set<String> vertices = graph.vertices();
         
@@ -465,7 +452,7 @@ public abstract class GraphInstanceTest {
     //covers empty graph
     public void testSourcesEmptyGraph(){
         Graph<String> graph = emptyInstance();
-        final String target = "Vertex1";
+        final String target = "vertex1";
         Map<String, Integer> sources = graph.sources(target);
         
         assertEquals("Expected new graph to have no sources", Collections.emptyMap(), sources);
@@ -477,9 +464,9 @@ public abstract class GraphInstanceTest {
     public void testSourcesNoTarget(){
         Graph<String> graph = emptyInstance();
         
-        graph.add("Vertex1");
-        graph.add("Vertex2");
-        final String target = "Vertex3";
+        graph.add("vertex1");
+        graph.add("vertex2");
+        final String target = "vertex3";
         Map<String, Integer> sources = graph.sources(target);
         
         assertEquals("Expected graph to have no sources", Collections.emptyMap(), sources);
@@ -492,9 +479,9 @@ public abstract class GraphInstanceTest {
     //       target has no sources
     public void testSourcesNoSourcesToTarget(){
         Graph<String> graph = emptyInstance();
-        final String target = "Vertex1";
+        final String target = "vertex1";
         graph.add(target);
-        graph.add("Vertex2");
+        graph.add("vertex2");
         Map<String, Integer> sources = graph.sources(target);
         
         assertEquals("Expected graph to have no sources", Collections.emptyMap(), sources);
@@ -508,10 +495,10 @@ public abstract class GraphInstanceTest {
         Graph<String> graph = emptyInstance();
         
         //create edges to test sources
-        final String target = "Vertex";
-        final String vertex1 = "Vertex1";
-        final String vertex2 = "Vertex2";
-        final String vertex3 = "Vertex3";
+        final String target = "vertex";
+        final String vertex1 = "vertex1";
+        final String vertex2 = "vertex2";
+        final String vertex3 = "vertex3";
         final int weight = 1;
         
         graph.set(vertex1, target, weight);
@@ -530,7 +517,7 @@ public abstract class GraphInstanceTest {
     //covers empty graph
     public void testTargetsEmptyGraph(){
         Graph<String> graph = emptyInstance();
-        Map<String, Integer> targets = graph.targets("Vertex");
+        Map<String, Integer> targets = graph.targets("vertex");
         
         assertEquals("Expected empty graph to have no targets", Collections.emptyMap(), targets);   
     }
@@ -541,10 +528,10 @@ public abstract class GraphInstanceTest {
     public void testTargetsNoTarget(){
         Graph<String> graph = emptyInstance();
         
-        graph.add("Vertex1");
-        graph.add("Vertex2");
+        graph.add("vertex1");
+        graph.add("vertex2");
         
-        final String source = "Vertex3";
+        final String source = "vertex3";
         
         Map<String, Integer> targets = graph.targets(source);
         
@@ -557,10 +544,10 @@ public abstract class GraphInstanceTest {
     //       source has no targets
     public void testTargetsNoTargetsFromSource(){
         Graph<String> graph = emptyInstance();
-        final String source = "Vertex1";
+        final String source = "vertex1";
         
         graph.add(source);
-        graph.add("Vertex2");
+        graph.add("vertex2");
         
         Map<String, Integer> targets = graph.targets(source);
         
@@ -573,10 +560,10 @@ public abstract class GraphInstanceTest {
     //       source has multiple targets
     public void testTargetsMultipleTargets(){
         Graph<String> graph = emptyInstance();
-        final String source = "Vertex";
-        final String vertex1 = "Vertex1";
-        final String vertex2 = "Vertex2";
-        final String vertex3 = "Vertex3";
+        final String source = "vertex";
+        final String vertex1 = "vertex1";
+        final String vertex2 = "vertex2";
+        final String vertex3 = "vertex3";
         final int weight = 1;
         
         graph.set(source, vertex1, weight);
