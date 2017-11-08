@@ -18,17 +18,8 @@ import java.util.stream.Collectors;
  * 
  * <p>PS2 instructions: you MUST use the provided rep.
  */
-public class ConcreteVerticesGraph implements Graph<String> {
+public class ConcreteVerticesGraph<L> implements Graph<L> {
    /**
-    * Warning: For this ConcreteVerticesGraph to be case-insensitive, all vertex labels
-    * are stored in lowercase and should be accessed as such. 
-    * sources() and targets() return a Map<String, Integer>, 
-    * which can lead to subtle bugs due to the equality used in storing the string labels. 
-    * Two vertices, v1 and v2,  are considered the same if their labels l1 and l2
-    * l1.equalsIgnoreCase(l2) == true. 
-    * Therefore "Hi, "hi", and "HI" are considered as one vertex, 
-    * requiring only one label stored, the lowercase form in this case. 
-    * An access like vertices().contains("Hi") will lead to bugs, so use with caution. 
     * 
     * <p>The implementation involves a lot of checking and defensive copies
     * which is costly in terms of both performance and memory. This is 
@@ -46,7 +37,7 @@ public class ConcreteVerticesGraph implements Graph<String> {
     *  any vertex would not affect the rep.
     *  
     */
-    private final List<Vertex> vertices = new ArrayList<>();
+    private final List<Vertex<L>> vertices = new ArrayList<>();
     
     // Abstraction function:
     //   represents a directed weighted graph as multiple vertices 
@@ -70,12 +61,12 @@ public class ConcreteVerticesGraph implements Graph<String> {
     //helper method
     /**
      * Returns the index of a vertex in list of vertices
-     * @param label the string label of the vertex being searched
+     * @param label the label of the vertex being searched
      * @return the index, i, of the vertex having label such that
      *         vertices.get(i).getLabel() == label, or -1 if
      *         no vertex was found
      */
-    private int indexInVertices(String label){
+    private int indexInVertices(L label){
         for(int i = 0; i < vertices.size(); i++){
             if ( vertices.get(i).getLabel().equals(label) ) {
                 return i;
@@ -84,33 +75,29 @@ public class ConcreteVerticesGraph implements Graph<String> {
         return -1;
     }
     //end of helper method
-    @Override public boolean add(String vertex) {
-        vertex = vertex.toLowerCase();
-        
+    @Override public boolean add(L vertex) {        
         if ( vertices().contains(vertex) ) {
             return false;
         }
-        Vertex vertexObj = new Vertex(vertex);    
+        Vertex<L> vertexObj = new Vertex<>(vertex);    
         final boolean vertexAdded = vertices.add(vertexObj);
         checkRep();
         return vertexAdded;
     }
     
-    @Override public int set(String source, String target, int weight) {
-        source = source.toLowerCase();
-        target = target.toLowerCase();
+    @Override public int set(L source, L target, int weight) {
         assert source != target;
         assert weight >= 0;
         
-        final Vertex sourceVertex;
-        final Vertex targetVertex;
+        final Vertex<L> sourceVertex;
+        final Vertex<L> targetVertex;
         
-        Set<String> verticeLabels = vertices();
+        Set<L> verticeLabels = vertices();
         if ( verticeLabels.contains(source) ) {
             int sourceIndex = indexInVertices(source);
             sourceVertex = vertices.get(sourceIndex);
         } else {
-            sourceVertex = new Vertex(source);
+            sourceVertex = new Vertex<>(source);
             vertices.add(sourceVertex);
         }
         
@@ -118,7 +105,7 @@ public class ConcreteVerticesGraph implements Graph<String> {
             int targetIndex = indexInVertices(target);
             targetVertex = vertices.get(targetIndex);
         } else {
-            targetVertex = new Vertex(target);
+            targetVertex = new Vertex<>(target);
             vertices.add(targetVertex);
         }
         
@@ -130,52 +117,63 @@ public class ConcreteVerticesGraph implements Graph<String> {
         return sourcePrevWeight;
     }
     
-    @Override public boolean remove(String vertex) {
-        vertex = vertex.toLowerCase();
-        
+    @Override public boolean remove(L vertex) {
         if ( !( vertices().contains(vertex)) ) {
             return false;
         }
         int vertexIndex = indexInVertices(vertex);
         assert vertexIndex != -1;
-        final Vertex removedVertex = vertices.remove(vertexIndex);
+        final Vertex<L> removedVertex = vertices.remove(vertexIndex);
         assert removedVertex.getLabel() == vertex;
         
-        for( Vertex v: vertices ) {
+        for( Vertex<L> v: vertices ) {
             v.remove(vertex);
         }
         return removedVertex != null;
     }
-    @Override public Set<String> vertices() {
+    @Override public Set<L> vertices() {
         return vertices.stream()
                 .map(Vertex::getLabel)
                 .collect(Collectors.toSet());
     }
-    /** Returns an immutable view of source vertices to a target, all string labels in lowercase */
-    @Override public Map<String, Integer> sources(String target) {
-        target = target.toLowerCase();
+    /** Returns an immutable view of source vertices to a target */
+    @Override public Map<L, Integer> sources(L target) {
         final int targetIndex = indexInVertices(target);
         if ( targetIndex < 0 ) {
             return Collections.emptyMap();
         }
-        Vertex targetVertex = vertices.get(targetIndex);
+        Vertex<L> targetVertex = vertices.get(targetIndex);
         
         return Collections.unmodifiableMap(targetVertex.getSources());
     }
-    /** Returns an immutable view of target vertices from a target, all string labels in lowercase */
-    @Override public Map<String, Integer> targets(String source) {
-        source = source.toLowerCase();
+    /** Returns an immutable view of target vertices from a target */
+    @Override public Map<L, Integer> targets(L source) {
         final int sourceIndex = indexInVertices(source);
         if ( sourceIndex < 0 ) {
             return Collections.emptyMap();
         }
-        Vertex sourceVertex = vertices.get(sourceIndex);
+        Vertex<L> sourceVertex = vertices.get(sourceIndex);
         
         return Collections.unmodifiableMap(sourceVertex.getTargets());
     }
-    
-    // TODO toString()
-    
+    //TODO better toString() as below
+    /**
+     * Returns a string representation of this graph.
+     *  
+     * A graph is made up of connected pairs of vertices, from source
+     * to target. The string rep for ConcreteVerticesGraph contains 
+     * all source vertices and the target vertices they each connect to:
+     *      sourceVertex -> targetVertices(a Map's string rep)
+     *      read as from sourceVertex to targetVertices
+     * 
+     * @return a string representation of this graph
+     */
+    @Override public String toString(){
+        return vertices.stream()
+                .filter(vertex -> vertex.getTargets().size() > 0)
+                .map(vertex -> vertex.getLabel().toString() + " -> " + vertex.getTargets())
+                .collect(Collectors.joining("\n"));
+    }
 }
 
 /**
@@ -191,10 +189,10 @@ public class ConcreteVerticesGraph implements Graph<String> {
  * Mutable datatype that represents a vertex in a mutable weighted directed graph
  * 
  */
-class Vertex {
-    private final String label;
-    private final Map<String, Integer> sources = new HashMap<>();
-    private final Map<String, Integer> targets = new HashMap<>();
+class Vertex<L> {
+    private final L label;
+    private final Map<L, Integer> sources = new HashMap<>();
+    private final Map<L, Integer> targets = new HashMap<>();
     
     // Abstraction Function:
     //   represents a vertex in a graph that connects to other vertices as a
@@ -203,7 +201,7 @@ class Vertex {
     //   from a source vertex to the target vertex
     //
     // Representation Invariant:
-    //   A vertex label must be in a non-empty lowercase string
+    //   A vertex label must be immutable
     //   A vertex cannot be its own source
     //   A vertex cannot be its own target
     //   All sources and targets must be distinct vertices
@@ -211,47 +209,40 @@ class Vertex {
     //
     // Safety from Exposure:
     //   All fields are  private and final
-    //   label is a string so guaranteed immutable
+    //   label is of type L, required to be immutable by the spec
     //   sources and targets are mutable, so operations use defensive copies
     //   and immutable views to prevent sharing the rep objects with clients
     
-    public Vertex(final String label){
-        assert label == label.toLowerCase();//fail fast approach
+    public Vertex(final L label){
         this.label = label;        
     }
     private void checkRep(){
-        final Set<String> sourceLabels = sources.keySet();
-        final Set<String> targetLabels = targets.keySet();
+        final Set<L> sourceLabels = sources.keySet();
+        final Set<L> targetLabels = targets.keySet();
         
-        assert this.label == this.label.toLowerCase();
         assert !sourceLabels.contains(this.label);
         assert !targetLabels.contains(this.label);
     }
     //helper code
-    private void checkInputLabel(final String inputLabel){
-        assert inputLabel != null && inputLabel != "";
-        assert inputLabel == inputLabel.toLowerCase();
+    private void checkInputLabel(final L inputLabel){
+        assert inputLabel != null;
         assert inputLabel != this.label;
     }
     
-    
-    // TODO: include a method that adds a vertex as both a source and 
-    //  target, to make it easier for the client when adding a
-    //  such a connection
-    /** Returns the string label of this vertex */
-    public String getLabel(){
+    /** Returns the label of this vertex */
+    public L getLabel(){
         return this.label;
     }
     /**
      * Adds a source connection to this vertex.
      * 
-     * @param source string label of the source vertex to this target vertex
+     * @param source the label of the source vertex to this target vertex
      * @param weight positive integer weight of this connection,
      *               requires weight > 0
      * @return true if source is successfully added with weight to
      *         this vertex
      */
-    public boolean addSource(final String source, final int weight){
+    public boolean addSource(final L source, final int weight){
         checkInputLabel(source);
         assert weight > 0;
         
@@ -264,13 +255,13 @@ class Vertex {
     /**
      * Adds a target connection from this vertex
      * 
-     * @param target string label of the target vertex from this vertex
+     * @param target the label of the target vertex from this vertex
      * @param weight positive integer weight of this connection,
      *               requires weight > 0
-     * @return true if target is successfuly added with weight to
+     * @return true if target is successfully added with weight to
      *         this vertex
      */
-    public boolean addTarget(final String target, final int weight){
+    public boolean addTarget(final L target, final int weight){
         checkInputLabel(target);
         assert weight > 0;
         
@@ -284,11 +275,11 @@ class Vertex {
     /**
      * Removes a vertex from this vertex, if it was a source, target or both
      * 
-     * @param vertex string label of the vertex being removed
+     * @param vertex the label of the vertex being removed
      * @return the previous weight of the vertex connection to this vertex
      *         zero if no such connection exists
      */
-    public int remove(final String vertex) {
+    public int remove(final L vertex) {
         checkInputLabel(vertex);
         int sourcePrevWeight = removeSource(vertex);
         int targetPrevWeight = removeTarget(vertex);
@@ -301,11 +292,11 @@ class Vertex {
     /**
      * Removes a source connection to this vertex
      * 
-     * @param source string label of the source vertex being removed
+     * @param source the label of the source vertex being removed
      * @return the previous weight from source to this vertex,
      *         zero if no such source exists
      */
-    public int removeSource(final String source){
+    public int removeSource(final L source){
         checkInputLabel(source);
         
         Integer previousWeight = sources.remove(source);
@@ -315,11 +306,11 @@ class Vertex {
     }
     /**
      * Removes a target connection from this vertex
-     * @param target string label of the target vertex being removed
+     * @param target the label of the target vertex being removed
      * @return the previous weight to target from this vertex,
      *         zero if no such target exists
      */
-    public int removeTarget(final String target){
+    public int removeTarget(final L target){
         checkInputLabel(target);
         
         Integer previousWeight = targets.remove(target);
@@ -340,12 +331,12 @@ class Vertex {
      *      update: weight > 0, source exists
      *      no change: source exists, weight = previousWeight  
      *  
-     * @param source string label of the source vertex to set
+     * @param source the label of the source vertex to set
      * @param weight non-negative integer to set source connection to
      * @return the previous weight from source to this vertex,
      *         zero if no such source exists
      */
-    public int setSource(final String source, final int weight){
+    public int setSource(final L source, final int weight){
         checkInputLabel(source);
         assert weight >= 0;
         final int previousWeight;
@@ -372,12 +363,12 @@ class Vertex {
      *      remove: weight = 0, target exists
      *      update: weight > 0, target exists
      * 
-     * @param target string label of the target vertex to set
+     * @param target the label of the target vertex to set
      * @param weight non-negative integer to set target connection to
      * @return the previous weight from source to this vertex,
      *         zero if no such target exists
      */
-    public int setTarget(final String target, final int weight){
+    public int setTarget(final L target, final int weight){
         checkInputLabel(target);
         assert weight >= 0;
         final int previousWeight;
@@ -393,12 +384,12 @@ class Vertex {
         return previousWeight;
     }
 
-    /** Returns an immutable view of this vertex's sources as a label, vertex pair*/
-    public Map<String, Integer> getSources(){
+    /** Returns an immutable view of this vertex's sources*/
+    public Map<L, Integer> getSources(){
         return Collections.unmodifiableMap(sources);
     }
-    /** Returns an immutable view of this vertex's targets as a label, vertex pair*/
-    public Map<String, Integer> getTargets(){
+    /** Returns an immutable view of this vertex's targets*/
+    public Map<L, Integer> getTargets(){
         return Collections.unmodifiableMap(targets);
     }
     /**
@@ -408,10 +399,10 @@ class Vertex {
      * source to that vertex, similar to this implementation:
      *      getTargets().contains(vertex)
      *      
-     * @param vertex string label of the vertex being checked
+     * @param vertex the label of the vertex being checked
      * @return true if vertex is a target from this vertex
      */
-    public boolean isTarget(final String vertex){
+    public boolean isTarget(final L vertex){
         return targets.containsKey(vertex);
     }
     /**
@@ -421,25 +412,29 @@ class Vertex {
      * target from that vertex, similar to this implementation:
      *      getSources().contains(vertex)
      *      
-     * @param vertex string label of the vertex being checked
+     * @param vertex the label of the vertex being checked
      * @return true if vertex is a source to this vertex
      */
-    public boolean isSource(final String vertex){
+    public boolean isSource(final L vertex){
         return sources.containsKey(vertex);
     }
     /**
      * Returns a string rep of this vertex
      * 
      * A vertex is defined by the its label, its source vertices and
-     * its targets vertices.The string returned is therefore equal to:
-     *   "label: getLabel(), sources: getSources().size(), targets: getTargets().size()"
+     * its targets vertices. The string returned is equivalent to:
+     *    this.getLabel() -> this.getTargets(a Map's string rep)
+     *    this.getLabel() <- this.getSources(a Map's string rep)
      *   
-     * @return string rep of this vertex, containing its label, the number
-     *        of sources and targets it has, with source: 0 if no source vertices
-     *        exist and targets: 0 if no target vertices exist
+     * @return string rep of this vertex, containing its label,
+     *         source vertices and target vertices with their respective
+     *         weights
      */
     @Override public String toString(){
-        return String.format("label: %s, sources: %d, targets: %d", 
-                getLabel(), getSources().size(), getTargets().size());
+        return String.format(
+                "%s -> %s \n" +
+                "%s <- %s",
+                this.label.toString(), this.targets,
+                this.label.toString(), this.sources);
     }
 }

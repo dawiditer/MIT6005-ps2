@@ -5,8 +5,6 @@ package graph;
 
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +24,7 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
      * Provide a ConcreteEdgesGraph for tests in GraphInstanceTest.
      */
     @Override public Graph<String> emptyInstance() {
-        return new ConcreteEdgesGraph();
+        return new ConcreteEdgesGraph<>();
     }
     
     /*
@@ -34,83 +32,44 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
      */
     
     // Testing strategy for ConcreteEdgesGraph.toString()
-    //   TODO
     //   concreteEdgesGraph: empty, contains multiple vertices and edges
-    //   the output string should contain the 
-    //   correct number of edges and vertices
-    
-    
-    // TODO tests for ConcreteEdgesGraph.toString()
-    // TODO: include tests for postcondition, ie, structure of the string
     @Test
     //covers empty graph
     public void testToStringEmptyGraph(){
-        Graph<String> concreteEdgesGraph = emptyInstance();
-        final String rep = concreteEdgesGraph.toString();
-        List<Integer> intsInRep = extractIntegers(rep);
-        final int repNumEdges = intsInRep.get(0);
-        final int repNumVertices = intsInRep.get(1);
+        Graph<String> graph = emptyInstance();
+        String emptyGraph = "Empty Graph";
         
-
-        assertNotEquals("Expected non-empty string rep", "", rep);
-        assertEquals("Expected empty graph to have no edges", 0, repNumEdges);
-        assertEquals("Expected empty graph to have no vertices", 0, repNumVertices);
-    }    
-    
+        assertTrue("Expected 'Empty Graph'", graph.toString().equals(emptyGraph));
+    }
     @Test
-    //covers graph contains multiple vertices and edges
-    public void testToStringNonEmptyGraph(){
-        Graph<String> concreteEdgesGraph = emptyInstance();
+    //covers graph containes vertices and edges
+    public void testToStringMultiple(){
+        Graph<String> graph = emptyInstance();
+
+        final String source1 = "source1";
+        //final String source2 = "source2";
+        final String target1 = "target1";
+       // final String target2 = "target2";
+        final int weight = 1;
         
-        //create 3 vertices with 2 edges
-        concreteEdgesGraph.set("Vertex1", "Vertex2", 1);
-        concreteEdgesGraph.set("Vertex2", "Vertex3", 1);
-        final int actualNumEdges = 2;
-        final int actualNumVertices = 3;
+        graph.set(source1, target1, weight);
+       // graph.set(source2, target2, weight);
+       // graph.set(source1, target2, weight);
+       // graph.set(source2, target1, weight);
         
-        final String rep = concreteEdgesGraph.toString();
-        List<Integer> intsInRep = extractIntegers(rep);
-        final int repNumEdges = intsInRep.get(0);
-        final int repNumVertices = intsInRep.get(1);
-        
-        // TODO: check if assertNotEquals is a good implementation
-        assertNotEquals("Expected non-empty string rep", "", rep);
-        assertEquals("Expected correct number of edges", actualNumEdges, repNumEdges);
-        assertEquals("Expected correct number of vertices", actualNumVertices, repNumVertices);
-       
+        String regex = "source1 -> target1: 1";
+        assertTrue("Expected correct syntax", 
+                graph.toString().matches(regex));
     }
     
-    //helper code
-    /**
-     * Extracts integers in a string, maintaining their order of occurrence
-     * 
-     * @param rep string containing integers
-     * @return a list of integers, lst, such that 
-     *         lst.get(0) = numEdges, lst.get(1) = numVertices,
-     *         and lst.size() = 2
-     */
-    private static List<Integer> extractIntegers(String rep){
-        Pattern p = Pattern.compile("(\\b\\d\\b)");
-        Matcher m = p.matcher(rep);
-        List<Integer> intsInRep = new ArrayList<>();
-        
-        int count = 0;
-        while(m.find()){
-            if(++count > 2){
-                throw new AssertionError("Expected only 2 integres");
-            }
-            intsInRep.add(Integer.valueOf(m.group())); 
-        }
-        return intsInRep;
-    }
-    
-    
+    // TODO tests for ConcreteEdgesGraph.toString()
+    // TODO: include tests for postcondition, ie, structure of the string
+   
     /*
      * Testing Edge...
      */
     
     // Testing strategy for Edge
-    //  TODO
     //  Partition for edge.getSource() -> source
     //     has only one input, edge
     //     has only one output, source 
@@ -138,40 +97,31 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //  Partition for thisEdge.equals(thatEdge)
     //      thisEdge equal to thatEdge (observational equality)
     //      thisEdge not equal to thatEdge
-    //      thisEdge.source == thatEdge.source
-    //      thisEdge.target == thatEdge.source
-    //      thisEdge.source different case to thatEdge.source
-    //      thisEdge.target different case to thatEdge.target
     //   include tests for reflexive, symmetric and transitive properties
     //  
     //  Partition for edge.hashCode()
     //      use two edges for comparison; thisEdge, thatEdge
     //      thisEdge equals() thatEdge
     //      thisEdge not equals() thatEdge
-    //      thisEdge.source == thatEdge.source
-    //      thisEdge.target == thatEdge.source
-    //      thisEdge.source different case to thatEdge.source
-    //      thisEdge.target different case to thatEdge.target
     //
-    // TODO tests for operations of Edge
     @Test
     public void testGetSource(){
-        final String source = "Vertex1";
-        Edge edge = new Edge(source, "Vertex2", 3);
+        final String source = "vertex1";
+        Edge<String> edge = new Edge<>(source, "vertex2", 3);
         
         assertEquals("Expected source vertex", source, edge.getSource()); 
     }
     @Test
     public void testGetTarget(){
-        final String target = "Vertex2";
-        Edge edge = new Edge("Vertex1", target, 3);
+        final String target = "vertex2";
+        Edge<String> edge = new Edge<>("vertex1", target, 3);
         
         assertEquals("Expected target vertex", target, edge.getTarget());
     }
     @Test
     public void testGetWeight(){
         final int weight = 3;
-        Edge edge = new Edge("Vertex1", "Vertex2", weight);
+        Edge<String> edge = new Edge<>("vertex1", "vertex2", weight);
         
         assertEquals("Expected correct weight", weight, edge.getWeight());
     }
@@ -179,9 +129,9 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //covers newWeight != edge.getWeight
     public void testSetWeightNotEqual(){
         final int weight = 3;
-        Edge edge = new Edge("Vertex1", "Vertex2", weight);
+        Edge<String> edge = new Edge<>("vertex1", "vertex2", weight);
         final int newWeight = 1;
-        Edge edgeNewWeight = edge.setWeight(newWeight);
+        Edge<String> edgeNewWeight = edge.setWeight(newWeight);
         
         assertFalse("Expected new edge after setting weight", edge == edgeNewWeight);
         assertEquals("Expected edge to be immutable", weight, edge.getWeight());
@@ -192,8 +142,8 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //covers newWeight = edge.getWeight
     public void testSetWeightEqual(){
         final int weight = 3;
-        Edge edge = new Edge("Vertex1", "Vertex2", weight);
-        Edge edgeNewWeight = edge.setWeight(weight);
+        Edge<String> edge = new Edge<>("vertex1", "vertex2", weight);
+        Edge<String> edgeNewWeight = edge.setWeight(weight);
         
         assertFalse("Expected new edge after setting weight", edge == edgeNewWeight);
         assertEquals("Expected new edge to have new weight", 
@@ -201,10 +151,10 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     }
     @Test
     public void testEdgeToString(){
-        final String source = "Vertex1";
-        final String target = "Vertex2";
+        final String source = "vertex1";
+        final String target = "vertex2";
         final int weight = 3;
-        Edge edge = new Edge(source, target, weight);
+        Edge<String> edge = new Edge<>(source, target, weight);
         
         final String edgeRep = edge.toString();
         
@@ -214,7 +164,6 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
         
     }
     //helper method    
-    // TODO: separate checks for source, target and weight
     // TODO: include tests for postcondition, ie, structure of the string
     /**
      * Checks whether the string representation of an edge contains the correct values
@@ -239,11 +188,10 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
     //Tests for edge.equals()
     @Test
     //covers thisEdge equal to thatEdge
-    //       thisEdge source and target == thatEdge source and target
-    public void testEqualsSameCaseEqualEdges(){
-        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge3 = new Edge("Vertex1", "Vertex2", 1);
+    public void testEqualsEdgesEqual(){
+        Edge<String> edge1 = new Edge<>("vertex1", "vertex2", 1);
+        Edge<String> edge2 = new Edge<>("vertex1", "vertex2", 1);
+        Edge<String> edge3 = new Edge<>("vertex1", "vertex2", 1);
         
         //reflexive,
         assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
@@ -253,123 +201,44 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
         assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
         assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
         //transitive
-        assertEquals("Expected edge1 transitively equal to edge2",
+        assertEquals("Expected edge1 transitively equal to edge3",
                 edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
     }
-    
-    @Test
-    //covers thisEdge equal to thatEdge
-    //       thisEdge.source different case to thatEdge.source
-    //       thisEdge.target == thatEdge.target
-    public void testEqualsDiffSourceCaseEqualEdges(){
-        Edge edge1 = new Edge("vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge3 = new Edge("vErtex1", "Vertex2", 1);
-        
-        
-        
-        assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
-        assertTrue("Expected egde2 equal to itself", edge2.equals(edge2));
-        assertTrue("Expected egde3 equal to itself", edge3.equals(edge3));
-        
-        assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
-        assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
-       
-        assertEquals("Expected edge1 transitively equal to edge2",
-                edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
-    }
-    
-    @Test
-    //covers thisEdge equal to thatEdge
-    //       thisEdge.target different case to thatEdge.target
-    //       thisEdge.source == thatEdge.source
-    public void testEqualsDiffTargetCaseEqualEdges(){
-        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "vertex2", 1);
-        Edge edge3 = new Edge("Vertex1", "VeRtex2", 1);
-        
-        
-        
-        assertTrue("Expected egde1 equal to itself", edge1.equals(edge1));
-        assertTrue("Expected egde2 equal to itself", edge2.equals(edge2));
-        assertTrue("Expected egde3 equal to itself", edge3.equals(edge3));
-        
-        assertTrue("Expected edge1 equal to edge2", edge1.equals(edge2));
-        assertTrue("Expected edge2 equal to edge1", edge2.equals(edge1));
-       
-        assertEquals("Expected edge1 by transition equal to edge2",
-                edge1.equals(edge2) && edge3.equals(edge2), edge1.equals(edge3));
-    }
-    
     @Test
     //covers thisEdge not equal to thatEdge
     public void testEqualsEdgesNotEqual(){
-        Edge edge1 = new Edge("vertex", "vertex1", 1);
-        Edge edge2 = new Edge("vertex1", "vertex", 1);
-        Edge edge3 = new Edge("vertex", "vertex1", 2);
+        Edge<String> edge1 = new Edge<>("vertex", "vertex1", 1);
+        Edge<String> edge2 = new Edge<>("vertex1", "vertex", 1);
         
         assertFalse("Expected edges not equal", edge1.equals(edge2));
         assertFalse("Expected edges not equal", edge2.equals(edge1));
-        assertFalse("Expected edges not equal", edge3.equals(edge1));
     }
     //Tests for edge.hashCode()
     @Test
     //covers thisEdge equals() thatEdge
     //       thisEdge source and target == thatEdge source and target
     public void testHashCodeEqualEdges(){
-        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
+        Edge<String> edge1 = new Edge<>("vertex1", "vertex2", 1);
+        Edge<String> edge2 = new Edge<>("vertex1", "vertex2", 1);
         
         int hashCodeEdge1 = edge1.hashCode();
         int hashCodeEdge2 = edge2.hashCode();
         
-        assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
-    }
-    
-    @Test
-    //covers thisEdge equals() thatEdge
-    //       thisEdge.source different case to thatEdge.source
-    //       thisEdge.target == thatEdge.target
-    public void testHashCodeDiffSourceCaseEqualEdges(){
-        Edge edge1 = new Edge("vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
-        
-        int hashCodeEdge1 = edge1.hashCode();
-        int hashCodeEdge2 = edge2.hashCode();
-        
-        assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
-    }
-    
-    @Test
-    //covers thisEdge equals() thatEdge
-    //       thisEdge.target different case to thatEdge.target
-    //       thisEdge.source == thatEdge.source
-    public void testHashCodeDiffTargetCaseEqualEdges(){
-        Edge edge1 = new Edge("Vertex1", "vertex2", 1);
-        Edge edge2 = new Edge("Vertex1", "Vertex2", 1);
-        
-        int hashCodeEdge1 = edge1.hashCode();
-        int hashCodeEdge2 = edge2.hashCode();
-        
+        assertEquals("Expected equal edges", edge1.equals(edge2), edge2.equals(edge1));
         assertEquals("Expected equal hashcode for equal edges", hashCodeEdge1, hashCodeEdge2);
     }
     
     @Test
     //covers thisEdge not equals() thatEdge
     public void testHashCodeEdgesNotEqual(){
-        Edge edge1 = new Edge("Vertex1", "Vertex2", 1);
-        Edge edge2 = new Edge("Vertex2", "Vertex1", 1);
-        Edge edge3 = new Edge("vertex1", "vertex2", 2);
+        Edge<String> edge1 = new Edge<>("vertex1", "vertex2", 1);
+        Edge<String> edge2 = new Edge<>("vertex2", "vertex1", 1);
         
         int hashCodeEdge1 = edge1.hashCode();
         int hashCodeEdge2 = edge2.hashCode();
-        int hashCodeEdge3 = edge3.hashCode();
         
+        assertFalse("Expected unequal objects", edge1.equals(edge2));
         assertNotEquals("Expected different hashcodes for unequal edges", 
                 hashCodeEdge1, hashCodeEdge2);
-        assertNotEquals("Expected different hashcodes for unequal edges", 
-                hashCodeEdge1, hashCodeEdge3);
-        assertNotEquals("Expected different hashcodes for unequal edges", 
-                hashCodeEdge2, hashCodeEdge3);
     }
 }
