@@ -44,7 +44,7 @@ public class ConcreteEdgesGraph<L> implements Graph<L> {
         final int sizeOfEdges = edges.size();
         final int sizeOfVertices = vertices.size();
         int minNumberOfVertices = 
-                sizeOfEdges == 0 ? 0: (int)Math.ceil(Math.sqrt(2 * sizeOfEdges) + 0.5);
+                sizeOfEdges == 0 ? 0 : (int)Math.ceil(Math.sqrt(2 * sizeOfEdges) + 0.5);
         
         assert sizeOfVertices >= minNumberOfVertices;  
     }
@@ -54,14 +54,12 @@ public class ConcreteEdgesGraph<L> implements Graph<L> {
     }    
     @Override public int set(L source, L target, int weight) {
         assert weight >= 0;
-        assert !(source.equals(target));
-        
         
         int indexOfEdge = indexOfEdgeInEdges(source, target);
         int previousWeight = 0;
         final Edge<L> previousEdge;
         
-        if ( weight > 0 ) {
+        if (weight > 0) {
             Edge<L> newEdge = new Edge<>(source, target, weight);
             if ( indexOfEdge < 0 ) {
                 add(source);
@@ -177,7 +175,7 @@ public class ConcreteEdgesGraph<L> implements Graph<L> {
  * 
  * This class is internal to the rep of ConcreteEdgesGraph.
  * 
- * <p>PS2 instructions: the specification and implementation of this class is
+ * <p>PS2 instructions: the specificatverticesion and implementation of this class is
  * up to you.
  */
 class Edge<L>{
@@ -189,7 +187,7 @@ class Edge<L>{
     // Representation invariant:
     //   source is a non-null L
     //   target is a non-null L
-    //   source != target
+    //   L must be immutable
     //   weight > 0
     // Safety from rep exposure:
     //   All fields are private and final
@@ -209,7 +207,6 @@ class Edge<L>{
         assert source != null;
         assert target != null;
         assert weight > 0;
-        assert !(source.equals(target));
     }
     //observers
     /** Returns this Edge's source*/   
